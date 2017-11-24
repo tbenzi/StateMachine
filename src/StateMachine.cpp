@@ -176,7 +176,7 @@ class StateMachine
 			}
 		};
 		
-		// call heckStatusConsistency after all AssingStatus calling to check consintecy of value
+		// call checkStatusConsistency after all AssingStatus calling to check values consintecy
 		bool CheckStatusConsistency ()
 		{
 			for (int i = 0; i < m_numStatus; i++)
