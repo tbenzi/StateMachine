@@ -33,7 +33,7 @@ class StateMachine
 {
 		vector<myStatusFunc> m_vfStatus;
 		vector<myDropOutFunc> m_vfDropOut;
-		vactor<vector<myTransitionFunc>> m_vfTransition;  //*************************************
+		vector<vector<myTransitionFunc>> m_vfTransition;  //*************************************
 		vector<myPickUpFunc> m_vfPickUp;
 		vector<myChangeStatusFunc> m_vfChangeStatusFunc;
 		vector<const char*> m_vStatusName;
