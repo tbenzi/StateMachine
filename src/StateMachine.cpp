@@ -175,6 +175,17 @@ class StateMachine
 				}
 			}
 		};
+		
+		// call checkStatusConsistency after all AssingStatus calling to check consintecy of value
+		bool CheckStatusConsistency ()
+		{
+			for (int i = 0; i < m_numStatus; i++)
+			{
+				if (m_vNextStatusIfExceededMaxMsInStatus[i] >= m_numStatus) return false;
+			}
+			return true;
+		}
+		
 		int GetStatusInd() { return m_actualStatus + 1; };
 		const char* GetStatusName () { return m_vStatusName[m_actualStatus]; };
 		void EnableLog (bool b_enable = false) { m_bLogEnable = b_enable; };
