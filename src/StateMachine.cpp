@@ -36,7 +36,7 @@ class StateMachine
 {
 		vector<myStatusFunc> m_vfStatus;					// State functions vector
 		vector<myDropOutFunc> m_vfDropOut;					// DropOut (from a state) functions vector
-		vactor<vector<myTransitionFunc>> m_vfTransition;	// Transition (from a specify state to another) functions vector
+		vector<vector<myTransitionFunc>> m_vfTransition;	// Transition (from a specify state to another) functions vector
 		vector<myPickUpFunc> m_vfPickUp;					// PickUp (into a state) functions vector
 		vector<myChangeStatusFunc> m_vfChangeStatusFunc;	// ChangeStatus functions vector
 		vector<const char*> m_vStatusName;					// State names vector
