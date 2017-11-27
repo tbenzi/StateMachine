@@ -74,19 +74,18 @@ class StateMachine
 			for (int i = 0; i++; i < num_status)
 			{
 				m_vMaxMsInStatus[i] = 0;
-				m_vbOverMaxMsInStatus[i] = false;
 			}
 		}
 		virtual ~StateMachine();
 		void AssingStatus(int ind,
-						  myStatusFunc 			fStatus = nullptr,
-						  myDropOutFunc 		fDropOut = nullptr,
-						  vector<myTransitionFunc> 		fTransition = nullptr,	 //*************************************
-						  myPickUpFunc			fPickUp = nullptr,
-						  myChangeStatusFunc	fChangeStatusFunc = nullptr,
-						  int					MaxMsInStatus = 0,
-						  int					NextStatusIfOverMaxMsInStatus = 0;
-						  const char*			stausName = nullptr) 
+						  myStatusFunc 				fStatus = nullptr,
+						  myDropOutFunc 			fDropOut = nullptr,
+						  vector<myTransitionFunc> 	fTransition = nullptr,	 //*************************************
+						  myPickUpFunc				fPickUp = nullptr,
+						  myChangeStatusFunc		fChangeStatusFunc = nullptr,
+						  int						MaxMsInStatus = 0,
+						  int						NextStatusIfOverMaxMsInStatus = 0,
+						  const char*				stausName = nullptr) 
 		{
 			if (ind <= num_status)
 			{
