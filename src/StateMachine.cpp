@@ -50,7 +50,7 @@ class StateMachine
 		int	m_msecCycle;
 		
 	public:
-		StateMachine(int num_status, void* pstruct_data = nullptr, msecCycle = 0)
+		StateMachine(int num_status, void* pstruct_data = nullptr, int msecCycle = 0)
 		{
 			if (m_pStructData == nullptr)
 			{
