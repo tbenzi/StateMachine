@@ -41,6 +41,7 @@ class StateMachine
 		vector<myChangeStatusFunc> m_vfChangeStatusFunc;	// ChangeStatus functions vector
 		vector<const char*> m_vStatusName;					// State names vector
 		vector<int> m_vMaxMsInStatus;						// Maximum allowed time to stack in any states vector 
+		vector<int> m_MsInStatus;
 		vector<int> m_vNextStatusIfExceededMaxMsInStatus;	// Next State to go if exceeded the maximum time in the state
 		int m_actualStatus;
 		int m_oldStatus;
@@ -108,7 +109,7 @@ class StateMachine
 					//*************************************
 				m_vfPickUp[ind] = fPickUp;
 				m_vfChangeStatusFunc[ind] = fChangeStatusFunc;
-				if ((MaxMsInStatus > 0) && (m_msecCycle == 0)
+				if ((MaxMsInStatus > 0) && (m_msecCycle == 0))
 				{
 					throw invalid_argument("Undefined cycles time"); 
 				}
@@ -147,7 +148,7 @@ class StateMachine
 			}
 			else
 			{
-				m_actualStatus = (*m_vfChangeStatusFunc[m_actualStatus])((m_pStructData);
+				m_actualStatus = (*m_vfChangeStatusFunc[m_actualStatus])(m_pStructData);
 			}
 			
 			// if the state is changed call the defined functions
