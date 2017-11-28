@@ -61,7 +61,7 @@ class CStateMachine
 				m_MaxMsInStatus[i] = 0;
 			}
 		}
-		virtual ~CStateMachine();
+		virtual ~CStateMachine() {};
 		void AssignData(void* pstruct_data = nullptr, int msecCycle = 0)
 		{
 			if (m_pStructData == nullptr)
@@ -70,16 +70,16 @@ class CStateMachine
 			}
 			m_pStructData = pstruct_data;
 			m_msecCycle = msecCycle;
-		}
-		void AssingStatus(int ind,
-						  myStatusFunc 				fStatus = nullptr,
-						  myDropOutFunc 			fDropOut = nullptr,
-						  myTransitionFunc* 		fTransition = nullptr,	 //*************************************
-						  myPickUpFunc				fPickUp = nullptr,
-						  myChangeStatusFunc		fChangeStatusFunc = nullptr,
-						  int						MaxMsInStatus = 0,
-						  int						NextStatusIfOverMaxMsInStatus = 0,
-						  const char*				stausName = nullptr) 
+		};
+		void AssignState(int ind,
+						myStatusFunc 				fStatus = nullptr,
+						myDropOutFunc 			fDropOut = nullptr,
+						myTransitionFunc* 		fTransition = nullptr,	 //*************************************
+						myPickUpFunc				fPickUp = nullptr,
+						myChangeStatusFunc		fChangeStatusFunc = nullptr,
+						int						MaxMsInStatus = 0,
+						int						NextStatusIfOverMaxMsInStatus = 0,
+						const char*				stausName = nullptr) 
 		{
 			if (ind < NUM_STATES)
 			{
@@ -113,11 +113,11 @@ class CStateMachine
 			{
 				//throw invalid_argument("Status ind too large."); 
 			}
-		}
+		};
 		
-		void manage()
+		void Manage()
 		{
-			bool bMaxMsInStatus;
+			bool bMaxMsInStatus = false;
 			
 			// Things to do in actual state
 			if (*m_fStatus[m_actualStatus] != nullptr)
@@ -176,7 +176,7 @@ class CStateMachine
 				if (m_NextStatusIfExceededMaxMsInStatus[i] >= NUM_STATES) return false;
 			}
 			return true;
-		}
+		};
 		
 		int GetStatusInd() { return m_actualStatus + 1; };
 		const char* GetStatusName () { return m_StatusName[m_actualStatus]; };
@@ -189,16 +189,35 @@ class CStateMachine
 
 struct { bool bEnable;} myData;
 
-CStateMachine* pStateMachine;
+CStateMachine StateMachine;
 
 void setup ()
 {
-	pStateMachine = new CStateMachine;
-	pStateMachine->AssignData(&myData, MS_CYCLE);
+	StateMachine.AssignData(&myData, MS_CYCLE);
+	StateMachine.AssignState(0,
+							nullptr,
+							nullptr,
+							nullptr,
+							nullptr,
+							nullptr,
+							0,
+							0,
+							"zero"); 
+	StateMachine.AssignState(1,
+							nullptr,
+							nullptr,
+							nullptr,
+							nullptr,
+							nullptr,
+							0,
+							0,
+							"uno"); 
 }
 
 void loop ()
 {
+	StateMachine.Manage();
+	delay(MS_CYCLE);
 }
 
 
