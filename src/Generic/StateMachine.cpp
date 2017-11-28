@@ -78,7 +78,7 @@ class StateMachine
 			}
 		}
 		virtual ~StateMachine();
-		void AssingStatus(int ind,
+		void AssignState(int ind,
 						  myStatusFunc 				fStatus = nullptr,
 						  myDropOutFunc 			fDropOut = nullptr,
 						  vector<myTransitionFunc> 	fTransition = nullptr,	 //*************************************
@@ -94,7 +94,6 @@ class StateMachine
 				{
 					throw invalid_argument("Undefined change status function"); 
 				}
-				ind--;
 				if (m_vfChangeStatusFunc[ind] != nullptr)
 				{
 					throw invalid_argument("Status ind already defined"); 
@@ -123,7 +122,7 @@ class StateMachine
 			}
 		}
 		
-		void manage()
+		void Manage()
 		{
 			bool bMaxMsInStatus;
 			
