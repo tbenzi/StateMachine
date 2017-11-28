@@ -51,14 +51,8 @@ class CStateMachine
 		int	m_msecCycle;
 		
 	public:
-		CStateMachine(void* pstruct_data = nullptr, int msecCycle = 0)
+		CStateMachine()
 		{
-			if (m_pStructData == nullptr)
-			{
-				//throw invalid_argument("Undefined data"); 
-			}
-			m_pStructData = pstruct_data;
-			m_msecCycle = msecCycle;
 			m_actualStatus = 0;
 			m_oldStatus = 0;
 			m_bLogEnable = false;
@@ -68,6 +62,15 @@ class CStateMachine
 			}
 		}
 		virtual ~CStateMachine();
+		void AssignData(void* pstruct_data = nullptr, int msecCycle = 0)
+		{
+			if (m_pStructData == nullptr)
+			{
+				//throw invalid_argument("Undefined data"); 
+			}
+			m_pStructData = pstruct_data;
+			m_msecCycle = msecCycle;
+		}
 		void AssingStatus(int ind,
 						  myStatusFunc 				fStatus = nullptr,
 						  myDropOutFunc 			fDropOut = nullptr,
@@ -186,11 +189,12 @@ class CStateMachine
 
 struct { bool bEnable;} myData;
 
-CStateMachine SpateMachine (&myData, MS_CYCLE);
+CStateMachine* pStateMachine;
 
 void setup ()
 {
-	
+	pStateMachine = new CStateMachine;
+	pStateMachine->AssignData(&myData, MS_CYCLE);
 }
 
 void loop ()
