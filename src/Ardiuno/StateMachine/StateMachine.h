@@ -22,7 +22,6 @@
 // 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define NUM_STATES 2
 // ******************************
 // CODE EMBRYO UNDER DEVELOPMENT
 // ******************************
@@ -72,10 +71,10 @@ class CStateMachine
 			m_msecCycle = msecCycle;
 		};
 		void AssignState(int ind,
-						myStatusFunc 				fStatus = nullptr,
+						myStatusFunc 			fStatus = nullptr,
 						myDropOutFunc 			fDropOut = nullptr,
 						myTransitionFunc* 		fTransition = nullptr,	 //*************************************
-						myPickUpFunc				fPickUp = nullptr,
+						myPickUpFunc			fPickUp = nullptr,
 						myChangeStatusFunc		fChangeStatusFunc = nullptr,
 						int						MaxMsInStatus = 0,
 						int						NextStatusIfOverMaxMsInStatus = 0,
@@ -181,43 +180,5 @@ class CStateMachine
 		int GetStatusInd() { return m_actualStatus + 1; };
 		const char* GetStatusName () { return m_StatusName[m_actualStatus]; };
 		void EnableLog (bool b_enable = false) { m_bLogEnable = b_enable; };
-		 
-
-		
 };
-#define MS_CYCLE 1000
-
-struct { bool bEnable;} myData;
-
-CStateMachine StateMachine;
-
-void setup ()
-{
-	StateMachine.AssignData(&myData, MS_CYCLE);
-	StateMachine.AssignState(0,
-							nullptr,
-							nullptr,
-							nullptr,
-							nullptr,
-							nullptr,
-							0,
-							0,
-							"zero"); 
-	StateMachine.AssignState(1,
-							nullptr,
-							nullptr,
-							nullptr,
-							nullptr,
-							nullptr,
-							0,
-							0,
-							"uno"); 
-}
-
-void loop ()
-{
-	StateMachine.Manage();
-	delay(MS_CYCLE);
-}
-
 
