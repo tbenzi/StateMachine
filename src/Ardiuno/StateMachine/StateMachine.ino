@@ -51,7 +51,7 @@ class CStateMachine
 		int	m_msecCycle;
 		
 	public:
-		CStateMachine(ivoid* pstruct_data = nullptr, int msecCycle = 0)
+		CStateMachine(void* pstruct_data = nullptr, int msecCycle = 0)
 		{
 			if (m_pStructData == nullptr)
 			{
@@ -62,7 +62,7 @@ class CStateMachine
 			m_actualStatus = 0;
 			m_oldStatus = 0;
 			m_bLogEnable = false;
-			for (int i = 0; i++; i < NUM_STATES)
+			for (int i = 0; i < NUM_STATES; i++)
 			{
 				m_MaxMsInStatus[i] = 0;
 			}
@@ -84,7 +84,6 @@ class CStateMachine
 				{
 					//throw invalid_argument("Undefined change status function"); 
 				}
-				ind;
 				if (m_fChangeStatusFunc[ind] != nullptr)
 				{
 					//throw invalid_argument("Status ind already defined"); 
@@ -146,9 +145,9 @@ class CStateMachine
 			{
 				if (m_bLogEnable)
 				{
-					ostringstream stxt;
-					stxt = "Change from " << m_StatusName[m_oldStatus] << " to " << m_StatusName[m_actualStatus];
-					Serial.println(stxt.str());
+//					ostringstream stxt;
+//					stxt = "Change from " << m_StatusName[m_oldStatus] << " to " << m_StatusName[m_actualStatus];
+//					Serial.println(stxt.str());
 				}
 				if (*m_fDropOut[m_oldStatus] != nullptr)
 				{
@@ -187,7 +186,7 @@ class CStateMachine
 
 struct { bool bEnable;} myData;
 
-CStateMachine SpateMachine (*myData, MS_CYCLE);
+CStateMachine SpateMachine (&myData, MS_CYCLE);
 
 void setup ()
 {

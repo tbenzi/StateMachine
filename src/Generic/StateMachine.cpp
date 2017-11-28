@@ -72,7 +72,7 @@ class StateMachine
 			m_actualStatus = 0;
 			m_oldStatus = 0;
 			m_bLogEnable = false;
-			for (int i = 0; i++; i < num_status)
+			for (int i = 0; i < NUM_STATES; i++)
 			{
 				m_vMaxMsInStatus[i] = 0;
 			}
