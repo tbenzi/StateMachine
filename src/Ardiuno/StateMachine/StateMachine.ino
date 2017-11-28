@@ -33,7 +33,7 @@ typedef void    (*myTransitionFunc)(void* pStructData);
 typedef void    (*myPickUpFunc)(void* pStructData);
 typedef int     (*myChangeStatusFunc)(void* pStructData);
 
-class StateMachine
+class CStateMachine
 {
 		myStatusFunc m_fStatus[NUM_STATES];					// State functions vector
 		myDropOutFunc m_fDropOut[NUM_STATES];					// DropOut (from a state) functions vector
@@ -51,7 +51,7 @@ class StateMachine
 		int	m_msecCycle;
 		
 	public:
-		StateMachine(ivoid* pstruct_data = nullptr, int msecCycle = 0)
+		CStateMachine(ivoid* pstruct_data = nullptr, int msecCycle = 0)
 		{
 			if (m_pStructData == nullptr)
 			{
@@ -67,7 +67,7 @@ class StateMachine
 				m_MaxMsInStatus[i] = 0;
 			}
 		}
-		virtual ~StateMachine();
+		virtual ~CStateMachine();
 		void AssingStatus(int ind,
 						  myStatusFunc 				fStatus = nullptr,
 						  myDropOutFunc 			fDropOut = nullptr,
@@ -183,5 +183,19 @@ class StateMachine
 
 		
 };
+#define MS_CYCLE 1000
+
+struct { bool bEnable;} myData;
+
+CStateMachine SpateMachine (*myData, MS_CYCLE);
+
+void setup ()
+{
+	
+}
+
+void loop ()
+{
+}
 
 
