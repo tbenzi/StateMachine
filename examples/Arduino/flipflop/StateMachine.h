@@ -71,10 +71,10 @@ class CStateMachine
 			m_msecCycle = msecCycle;
 		};
 		void AssignState(int ind,
-						myStatusFunc 				fStatus = nullptr,
+						myStatusFunc 			fStatus = nullptr,
 						myDropOutFunc 			fDropOut = nullptr,
 						myTransitionFunc* 		fTransition = nullptr,	 //*************************************
-						myPickUpFunc				fPickUp = nullptr,
+						myPickUpFunc			fPickUp = nullptr,
 						myChangeStatusFunc		fChangeStatusFunc = nullptr,
 						int						MaxMsInStatus = 0,
 						int						NextStatusIfOverMaxMsInStatus = 0,

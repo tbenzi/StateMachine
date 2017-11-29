@@ -34,6 +34,57 @@ MY_DATA myData;
 
 CStateMachine StateMachine;
 
+void PrintEnable (MY_DATA* pmyData)
+{
+	char c = pmyData->bEnable ? '1' : '0';
+	Serial.print("bEnable:");
+	Serial.println(c);
+}
+
+void StatusFuncZero(void* pData)
+{
+	Serial.println("StatusFuncZero");
+	PrintEnable ((MY_DATA*)pData);
+}
+
+void DropOutFuncZero(void* pData)
+{
+	Serial.println("DropOutFuncZero");
+	PrintEnable ((MY_DATA*)pData);
+}
+
+void TransitionFuncZero(void* pData)
+{
+	Serial.println("TransitionFuncZero");
+	PrintEnable ((MY_DATA*)pData);
+}
+
+void PickUpFuncZero(void* pData)
+{
+	Serial.println("PickUpFuncZero");
+	PrintEnable ((MY_DATA*)pData);
+}
+void StatusFuncOne(void* pData)
+{
+	Serial.println("StatusFuncOne");
+	PrintEnable ((MY_DATA*)pData);
+}
+void DropOutFuncOne(void* pData)
+{
+	Serial.println("DropOutFuncOne");
+	PrintEnable ((MY_DATA*)pData);
+}
+void TransitionFuncOne(void* pData)
+{
+	Serial.println("TransitionFuncOne");
+	PrintEnable ((MY_DATA*)pData);
+}
+void PickUpFuncOne(void* pData)
+{
+	Serial.println("PickUpFuncOne");
+	PrintEnable ((MY_DATA*)pData);
+}
+
 int ChangeStateZero (void* pData)
 {
 	MY_DATA* pmyData = (MY_DATA*)pData;
@@ -47,19 +98,19 @@ void setup ()
 
 	StateMachine.AssignData(&myData, MS_CYCLE);
 	StateMachine.AssignState(0,
+							StatusFuncZero,
+							DropOutFuncZero,
 							nullptr,
-							nullptr,
-							nullptr,
-							nullptr,
+							PickUpFuncZero,
 							ChangeStateZero,
 							0,
 							0,
 							"zero"); 
 	StateMachine.AssignState(1,
+							StatusFuncOne,
+							DropOutFuncOne,
 							nullptr,
-							nullptr,
-							nullptr,
-							nullptr,
+							PickUpFuncOne,
 							nullptr,
 							2000,
 							0,
