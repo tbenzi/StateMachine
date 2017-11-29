@@ -91,6 +91,13 @@ int ChangeStateZero (void* pData)
 	return pmyData->bEnable ? 1 : 0;
 }
 
+
+myTransitionFunc pTransitionFuncZero[NUM_STATES] =
+{
+	nullptr,
+	TransitionFuncZero
+};
+
 void setup ()
 {
 	// Start the serial interface
@@ -100,7 +107,7 @@ void setup ()
 	StateMachine.AssignState(0,
 							StatusFuncZero,
 							DropOutFuncZero,
-							nullptr,
+							pTransitionFuncZero,
 							PickUpFuncZero,
 							ChangeStateZero,
 							0,
