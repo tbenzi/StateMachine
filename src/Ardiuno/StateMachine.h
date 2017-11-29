@@ -78,6 +78,7 @@ class CStateMachine
 		int	m_msecCycle;
 		E_STATE_MACHINE_ERROR m_StateError;
 	public:
+	
 		CStateMachine()
 		{
 			m_StateError = NO_ERROR;
@@ -90,6 +91,7 @@ class CStateMachine
 			}
 		};
 		virtual ~CStateMachine() {};
+		
 		void AssignData(void* pstruct_data = nullptr, int msecCycle = 0)
 		{
 			if (m_pStructData == nullptr)
@@ -99,6 +101,7 @@ class CStateMachine
 			m_pStructData = pstruct_data;
 			m_msecCycle = msecCycle;
 		};
+		
 		void AssignState(int ind,
 						myStatusFunc 			fStatus = nullptr,
 						myDropOutFunc 			fDropOut = nullptr,
@@ -195,9 +198,9 @@ class CStateMachine
 			{
 				if (m_bLogEnable)
 				{
-//					ostringstream stxt;
-//					stxt = "Change from " << m_StatusName[m_oldStatus] << " to " << m_StatusName[m_actualStatus];
-//					Serial.println(stxt.str());
+					char txt[64];
+					sprintf(txt, "Change from %s to %s", m_StatusName[m_oldStatus], m_StatusName[m_actualStatus]);
+					Serial.println(txt);
 				}
 				if (*m_fDropOut[m_oldStatus] != nullptr)
 				{
@@ -215,10 +218,10 @@ class CStateMachine
 			}
 		};
 		
-		// call checkStatusConsistency after all AssingState calling to check consintecy of value
-		E_STATE_MACHINE_ERROR CheckStatusConsistency ()	{ return m_StateError; };
+		// call GetInitError after all AssingState calling to check consintecy of init value
+		E_STATE_MACHINE_ERROR GetInitError ()	{ return m_StateError; };
 		
-		const char* GetErrorString() { return stateMachineErrorString[m_StateError].s; };
+		const char* GetInitErrorString() { return stateMachineErrorString[m_StateError].s; };
 
 		int GetStatusInd() { return m_actualStatus + 1; };
 		const char* GetStatusName () { return m_StatusName[m_actualStatus]; };
