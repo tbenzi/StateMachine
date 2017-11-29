@@ -53,9 +53,9 @@ void DropOutFuncZero(void* pData)
 	PrintEnable ((MY_DATA*)pData);
 }
 
-void TransitionFuncZero(void* pData)
+void TransitionFuncZeroToOne(void* pData)
 {
-	Serial.println("TransitionFuncZero");
+	Serial.println("TransitionFuncZeroToOne");
 	PrintEnable ((MY_DATA*)pData);
 }
 
@@ -74,9 +74,9 @@ void DropOutFuncOne(void* pData)
 	Serial.println("DropOutFuncOne");
 	PrintEnable ((MY_DATA*)pData);
 }
-void TransitionFuncOne(void* pData)
+void TransitionFuncOneToZero(void* pData)
 {
-	Serial.println("TransitionFuncOne");
+	Serial.println("TransitionFuncOneToZero");
 	PrintEnable ((MY_DATA*)pData);
 }
 void PickUpFuncOne(void* pData)
@@ -95,7 +95,7 @@ int ChangeStateZero (void* pData)
 myTransitionFunc pTransitionFuncZero[NUM_STATES] =
 {
 	nullptr,
-	TransitionFuncZero
+	TransitionFuncZeroToOne
 };
 
 void setup ()

@@ -25,6 +25,9 @@
 // ******************************
 // CODE EMBRYO UNDER DEVELOPMENT
 // ******************************
+#ifndef NUM_STATES
+ERROR_DEFINE_NUM_STATES_VALUE
+#endif
 
 typedef void    (*myStatusFunc)(void* pStructData);
 typedef void    (*myDropOutFunc)(void* pStructData);
@@ -38,7 +41,9 @@ typedef enum {	NO_ERROR 					= 0,
 				UNDFINED_CYCLE_TIME			= 3,
 				IND_STATE_OVER_MAX			= 4,
 				IND_STATE_OVER_MAX_IN_TRANS = 5,
-				MAX_NUM_ERROR				= 6
+				NO_CHANGE_STATE_DEFINED		= 6,
+				WRONG_IND_STATE_MAX_IN_TRANS = 7,
+				MAX_NUM_ERROR 
 } E_STATE_MACHINE_ERROR;
 
 struct STR_ERR {
@@ -50,7 +55,9 @@ STR_ERR stateMachineErrorString[MAX_NUM_ERROR] =
 			 {"STATE_WITHOUT_CHANGE"},
 			 {"UNDFINED_CYCLE_TIME"},
 			 {"IND_STATE_OVER_MAX"},
-			 {"IND_STATE_OVER_MAX_IN_TRANS"}
+			 {"IND_STATE_OVER_MAX_IN_TRANS"},
+			 {"NO_CHANGE_STATE_DEFINED"},
+			 {"WRONG_IND_STATE_MAX_IN_TRANS"},
 };
 
 class CStateMachine
@@ -107,7 +114,10 @@ class CStateMachine
 				// Check Parameters
 				if (fChangeStatusFunc == nullptr)
 				{
-					//throw invalid_argument("Undefined change status function"); 
+					if ((MaxMsInStatus == 0) || (NextStatusIfOverMaxMsInStatus == ind))
+					{
+						m_StateError = NO_CHANGE_STATE_DEFINED;
+					}
 				}
 				if (m_fChangeStatusFunc[ind] != nullptr)
 				{
@@ -116,6 +126,10 @@ class CStateMachine
 				if ((MaxMsInStatus > 0) && (m_msecCycle == 0))
 				{
 					m_StateError = UNDFINED_CYCLE_TIME;
+				}
+				if ((MaxMsInStatus > 0) && (NextStatusIfOverMaxMsInStatus == ind))
+				{
+					m_StateError = WRONG_IND_STATE_MAX_IN_TRANS;
 				}
 				if (NextStatusIfOverMaxMsInStatus >= NUM_STATES)
 				{
