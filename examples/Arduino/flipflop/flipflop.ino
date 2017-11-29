@@ -24,7 +24,7 @@
 
 #define NUM_STATES 2
 
-#include "StateMachine.h"
+#include "T:\Arduino\StateMachine\src\Ardiuno\StateMachine.h"
 
 #define MS_CYCLE 1000
 
@@ -123,6 +123,10 @@ void setup ()
 							0,
 							"one"); 
 	StateMachine.EnableLog(true);
+	
+	Serial.println(StateMachine.CheckStatusConsistency ());
+	Serial.println(StateMachine.GetErrorString());
+
 }
 
 void loop ()

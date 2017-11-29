@@ -32,13 +32,26 @@ typedef void    (*myTransitionFunc)(void* pStructData);
 typedef void    (*myPickUpFunc)(void* pStructData);
 typedef int     (*myChangeStatusFunc)(void* pStructData);
 
-typedef eunm {	NO_ERROR 					= 0,
+typedef enum {	NO_ERROR 					= 0,
 				ALREADY_DEFINED_STATE 		= 1,
 				STATE_WITHOUT_CHANGE		= 2,
 				UNDFINED_CYCLE_TIME			= 3,
 				IND_STATE_OVER_MAX			= 4,
 				IND_STATE_OVER_MAX_IN_TRANS = 5,
+				MAX_NUM_ERROR				= 6
 } E_STATE_MACHINE_ERROR;
+
+struct STR_ERR {
+	const char* s;
+};
+STR_ERR stateMachineErrorString[MAX_NUM_ERROR] =
+			{{"NO_ERROR"},
+			 {"ALREADY_DEFINED_STATE"},
+			 {"STATE_WITHOUT_CHANGE"},
+			 {"UNDFINED_CYCLE_TIME"},
+			 {"IND_STATE_OVER_MAX"},
+			 {"IND_STATE_OVER_MAX_IN_TRANS"}
+};
 
 class CStateMachine
 {
@@ -68,7 +81,7 @@ class CStateMachine
 			{
 				m_MaxMsInStatus[i] = 0;
 			}
-		}
+		};
 		virtual ~CStateMachine() {};
 		void AssignData(void* pstruct_data = nullptr, int msecCycle = 0)
 		{
@@ -191,6 +204,8 @@ class CStateMachine
 		// call checkStatusConsistency after all AssingState calling to check consintecy of value
 		E_STATE_MACHINE_ERROR CheckStatusConsistency ()	{ return m_StateError; };
 		
+		const char* GetErrorString() { return stateMachineErrorString[m_StateError].s; };
+
 		int GetStatusInd() { return m_actualStatus + 1; };
 		const char* GetStatusName () { return m_StatusName[m_actualStatus]; };
 		void EnableLog (bool b_enable = false) { m_bLogEnable = b_enable; };
