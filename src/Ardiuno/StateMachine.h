@@ -32,6 +32,14 @@ typedef void    (*myTransitionFunc)(void* pStructData);
 typedef void    (*myPickUpFunc)(void* pStructData);
 typedef int     (*myChangeStatusFunc)(void* pStructData);
 
+typedef eunm {	NO_ERROR 					= 0,
+				ALREADY_DEFINED_STATE 		= 1,
+				STATE_WITHOUT_CHANGE		= 2,
+				UNDFINED_CYCLE_TIME			= 3,
+				IND_STATE_OVER_MAX			= 4,
+				IND_STATE_OVER_MAX_IN_TRANS = 5,
+} E_STATE_MACHINE_ERROR;
+
 class CStateMachine
 {
 		myStatusFunc m_fStatus[NUM_STATES];					// State functions vector
@@ -48,10 +56,11 @@ class CStateMachine
 		void* m_pStructData;
 		bool m_bLogEnable;
 		int	m_msecCycle;
-		
+		E_STATE_MACHINE_ERROR m_StateError;
 	public:
 		CStateMachine()
 		{
+			m_StateError = NO_ERROR;
 			m_actualStatus = 0;
 			m_oldStatus = 0;
 			m_bLogEnable = false;
@@ -81,41 +90,53 @@ class CStateMachine
 						const char*				stausName = nullptr) 
 		{
 			if (ind < NUM_STATES)
-			{
+			{	
+				// Check Parameters
 				if (fChangeStatusFunc == nullptr)
 				{
 					//throw invalid_argument("Undefined change status function"); 
 				}
 				if (m_fChangeStatusFunc[ind] != nullptr)
 				{
-					//throw invalid_argument("Status ind already defined"); 
+					m_StateError = ALREADY_DEFINED_STATE;
 				}
+				if ((MaxMsInStatus > 0) && (m_msecCycle == 0))
+				{
+					m_StateError = UNDFINED_CYCLE_TIME;
+				}
+				if (NextStatusIfOverMaxMsInStatus >= NUM_STATES)
+				{
+					m_StateError = IND_STATE_OVER_MAX_IN_TRANS;
+				}
+				if (m_StateError != NO_ERROR)
+				{
+					return;
+				}
+				// Parameters are OK
 				m_fStatus[ind] = fStatus;
 				m_fDropOut[ind] = fDropOut;
-					 //*************************************
 				for (int i = 0; i < NUM_STATES; i++)
 				{
 					m_fTransition[ind][i] = fTransition[i];
 				}
-					//*************************************
 				m_fPickUp[ind] = fPickUp;
 				m_fChangeStatusFunc[ind] = fChangeStatusFunc;
-				if ((MaxMsInStatus > 0) && (m_msecCycle == 0))
-				{
-					//throw invalid_argument("Undefined cycles time"); 
-				}
 				m_MaxMsInStatus[ind] = MaxMsInStatus;
 				m_NextStatusIfExceededMaxMsInStatus[ind] = NextStatusIfOverMaxMsInStatus - 1;
 				m_StatusName [ind] = stausName;
 			}
 			else
 			{
-				//throw invalid_argument("Status ind too large."); 
+				m_StateError = IND_STATE_OVER_MAX;
 			}
 		};
 		
 		void Manage()
 		{
+			if (m_StateError != NO_ERROR)
+			{
+				return;
+			}
 			bool bMaxMsInStatus = false;
 			
 			// Things to do in actual state
@@ -167,15 +188,8 @@ class CStateMachine
 			}
 		};
 		
-		// call checkStatusConsistency after all AssingStatus calling to check consintecy of value
-		bool CheckStatusConsistency ()
-		{
-			for (int i = 0; i < NUM_STATES; i++)
-			{
-				if (m_NextStatusIfExceededMaxMsInStatus[i] >= NUM_STATES) return false;
-			}
-			return true;
-		};
+		// call checkStatusConsistency after all AssingState calling to check consintecy of value
+		E_STATE_MACHINE_ERROR CheckStatusConsistency ()	{ return m_StateError; };
 		
 		int GetStatusInd() { return m_actualStatus + 1; };
 		const char* GetStatusName () { return m_StatusName[m_actualStatus]; };
