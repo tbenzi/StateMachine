@@ -24,8 +24,8 @@
 
 #define NUM_STATES 2
 
-//#include "T:\Arduino\StateMachine\src\Ardiuno\StateMachine.h"
-#include "C:\arduino\Develop\StateMachine\src\Ardiuno\StateMachine.h"
+//#include "T:\Arduino\StateMachine\src\Arduino\StateMachine.h"
+#include "C:\arduino\Develop\StateMachine\src\Arduino\StateMachine.h"
 
 #define MS_CYCLE 1000
 

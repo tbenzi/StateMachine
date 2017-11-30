@@ -154,6 +154,12 @@ class CStateMachine
 				m_MaxMsInStatus[ind] = MaxMsInStatus;
 				m_NextStatusIfExceededMaxMsInStatus[ind] = NextStatusIfOverMaxMsInStatus;
 				m_StatusName [ind] = stausName;
+				Serial.print("ind:");
+				Serial.println(ind);
+				Serial.print("MaxMsInStatus:");
+				Serial.println(MaxMsInStatus);
+				Serial.print("NextStatusIfOverMaxMsInStatus:");
+				Serial.println(NextStatusIfOverMaxMsInStatus);
 			}
 			else
 			{
@@ -163,6 +169,8 @@ class CStateMachine
 		
 		void Manage()
 		{
+			Serial.print("******** m_actualStatus:");
+			Serial.println(m_actualStatus);
 			if (m_StateError != NO_ERROR)
 			{
 				return;
@@ -179,19 +187,30 @@ class CStateMachine
 			// if exceeded the maximum, perform a state change
 			// otherwise
 			// call the chageStatus function
+			Serial.print("m_MaxMsInStatus:");
+			Serial.println(m_MaxMsInStatus[m_actualStatus]);
+			Serial.print("m_MsInStatus:");
+			Serial.println(m_MsInStatus[m_actualStatus]);
 			if (m_MaxMsInStatus[m_actualStatus] > 0)
 			{
+				Serial.print(">0 ****************");
 				m_MsInStatus[m_actualStatus] += m_msecCycle;
 				bMaxMsInStatus = m_MsInStatus[m_actualStatus] >= m_MaxMsInStatus[m_actualStatus];
 			}
 			if (bMaxMsInStatus)
 			{
 				m_actualStatus = m_NextStatusIfExceededMaxMsInStatus[m_actualStatus];
+				m_MsInStatus[m_actualStatus] = 0;
 			}
 			else
 			{
-				m_actualStatus = (*m_fChangeStatusFunc[m_actualStatus])(m_pStructData);
+				if (m_fChangeStatusFunc[m_actualStatus] != nullptr)
+				{
+					m_actualStatus = (*m_fChangeStatusFunc[m_actualStatus])(m_pStructData);
+				}
 			}
+			Serial.print("m_actualStatus:");
+			Serial.println(m_actualStatus);
 			
 			// if the state is changed call the defined functions
 			if (m_actualStatus != m_oldStatus)
@@ -223,7 +242,7 @@ class CStateMachine
 		
 		const char* GetInitErrorString() { return stateMachineErrorString[m_StateError].s; };
 
-		int GetStatusInd() { return m_actualStatus + 1; };
+		int GetStatusInd() { return m_actualStatus; };
 		const char* GetStatusName () { return m_StatusName[m_actualStatus]; };
 		void EnableLog (bool b_enable = false) { m_bLogEnable = b_enable; };
 };
