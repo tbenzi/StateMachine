@@ -32,7 +32,32 @@ typedef void    (*myTransitionFunc)(void* pStructData);
 typedef void    (*myPickUpFunc)(void* pStructData);
 typedef int     (*myChangeStatusFunc)(void* pStructData);
 
-class StateMachine
+typedef enum {	NO_ERROR 					= 0,
+				ALREADY_DEFINED_STATE 		= 1,
+				STATE_WITHOUT_CHANGE		= 2,
+				UNDFINED_CYCLE_TIME			= 3,
+				IND_STATE_OVER_MAX			= 4,
+				IND_STATE_OVER_MAX_IN_TRANS = 5,
+				NO_CHANGE_STATE_DEFINED		= 6,
+				WRONG_IND_STATE_MAX_IN_TRANS = 7,
+				MAX_NUM_ERROR 
+} E_STATE_MACHINE_ERROR;
+
+struct STR_ERR {
+	const char* s;
+};
+STR_ERR stateMachineErrorString[MAX_NUM_ERROR] =
+			{{"NO_ERROR"},
+			 {"ALREADY_DEFINED_STATE"},
+			 {"STATE_WITHOUT_CHANGE"},
+			 {"UNDFINED_CYCLE_TIME"},
+			 {"IND_STATE_OVER_MAX"},
+			 {"IND_STATE_OVER_MAX_IN_TRANS"},
+			 {"NO_CHANGE_STATE_DEFINED"},
+			 {"WRONG_IND_STATE_MAX_IN_TRANS"},
+};
+
+class CStateMachine
 {
 		vector<myStatusFunc> m_vfStatus;					// State functions vector
 		vector<myDropOutFunc> m_vfDropOut;					// DropOut (from a state) functions vector
@@ -93,12 +118,34 @@ class StateMachine
 				if (fChangeStatusFunc == nullptr)
 				{
 					throw invalid_argument("Undefined change status function"); 
+					if ((MaxMsInStatus == 0) || (NextStatusIfOverMaxMsInStatus == ind))
+					{
+						m_StateError = NO_CHANGE_STATE_DEFINED;
+					}
 				}
 				if (m_vfChangeStatusFunc[ind] != nullptr)
 				{
 					throw invalid_argument("Status ind already defined"); 
+					m_StateError = ALREADY_DEFINED_STATE;
 				}
-				m_vfStatus[ind] = fStatus;
+				if ((MaxMsInStatus > 0) && (m_msecCycle == 0))
+				{
+					m_StateError = UNDFINED_CYCLE_TIME;
+				}
+				if ((MaxMsInStatus > 0) && (NextStatusIfOverMaxMsInStatus == ind))
+				{
+					m_StateError = WRONG_IND_STATE_MAX_IN_TRANS;
+				}
+				if (NextStatusIfOverMaxMsInStatus >= NUM_STATES)
+				{
+					m_StateError = IND_STATE_OVER_MAX_IN_TRANS;
+				}
+				if (m_StateError != NO_ERROR)
+				{
+					return;
+				}
+				// Parameters are OK
+								m_vfStatus[ind] = fStatus;
 				m_vfDropOut[ind] = fDropOut;
 					 //*************************************
 				for (int i = 0; i < num_status; i++)
@@ -107,6 +154,7 @@ class StateMachine
 				}
 					//*************************************
 				m_vfPickUp[ind] = fPickUp;
+
 				m_vfChangeStatusFunc[ind] = fChangeStatusFunc;
 				if ((MaxMsInStatus > 0) && (m_msecCycle == 0))
 				{
@@ -144,10 +192,14 @@ class StateMachine
 			if (bMaxMsInStatus)
 			{
 				m_actualStatus = m_vNextStatusIfExceededMaxMsInStatus[m_actualStatus];
+				m_MsInStatus[m_actualStatus] = 0;
 			}
 			else
 			{
+				if (m_fChangeStatusFunc[m_actualStatus] != nullptr)
+				{
 				m_actualStatus = (*m_vfChangeStatusFunc[m_actualStatus])(m_pStructData);
+				}
 			}
 			
 			// if the state is changed call the defined functions
@@ -175,18 +227,13 @@ class StateMachine
 			}
 		};
 		
-		// call checkStatusConsistency after all AssingStatus calling to check consintecy of value
-		bool CheckStatusConsistency ()
-		{
-			for (int i = 0; i < m_numStatus; i++)
-			{
-				if (m_vNextStatusIfExceededMaxMsInStatus[i] >= m_numStatus) return false;
-			}
-			return true;
-		}
+		// call GetInitError after all AssingState calling to check consintecy of init value
+		E_STATE_MACHINE_ERROR GetInitError ()	{ return m_StateError; };
 		
-		int GetStatusInd() { return m_actualStatus + 1; };
-		const char* GetStatusName () { return m_vStatusName[m_actualStatus]; };
+		const char* GetInitErrorString() { return stateMachineErrorString[m_StateError].s; };
+
+		int GetStatusInd() { return m_actualStatus; };
+		const char* GetStatusName () { return m_StatusName[m_actualStatus]; };
 		void EnableLog (bool b_enable = false) { m_bLogEnable = b_enable; };
 		 
 
