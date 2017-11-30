@@ -1,8 +1,8 @@
 # StateMachine
 
-Present library implements an object ``StateMachine``, representing an advanced finite state machine useful to build a complex automation process.
+Present library implements an object **``StateMachine``**, representing an advanced finite state machine useful to build a complex automation process.
 
-Present ``StateMachine`` object is conceived to be as more general as possible: it allowe building Moore finite state machines (where output depends only by states) or Mealy finite state machines (where output depends by inputs and state), and it embeds some time-based counters that allows to implement an advanced error handling behavior.
+Present **``StateMachine``** object is conceived to be as more general as possible: it allowe building Moore finite state machines (where output depends only by states) or Mealy finite state machines (where output depends by inputs and state), and it embeds some time-based counters that allows to implement an advanced error handling behavior.
 
 ## Structure
 
