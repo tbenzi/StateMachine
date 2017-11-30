@@ -152,7 +152,7 @@ class CStateMachine
 				m_fPickUp[ind] = fPickUp;
 				m_fChangeStatusFunc[ind] = fChangeStatusFunc;
 				m_MaxMsInStatus[ind] = MaxMsInStatus;
-				m_NextStatusIfExceededMaxMsInStatus[ind] = NextStatusIfOverMaxMsInStatus - 1;
+				m_NextStatusIfExceededMaxMsInStatus[ind] = NextStatusIfOverMaxMsInStatus;
 				m_StatusName [ind] = stausName;
 			}
 			else
