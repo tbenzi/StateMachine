@@ -32,7 +32,9 @@
 bool bEnableStateMachine;
 
 // global data for Statemachine ----------------
-typedef struct { bool bEnable;} MY_DATA;
+typedef struct {bool bChangeZero;
+				bool bChangeOne;
+				} MY_DATA;
 
 MY_DATA myData;
 //----------------------------------------------
@@ -43,9 +45,9 @@ CStateMachine StateMachine;
 // To print the value of bool bEnable
 void PrintEnable (MY_DATA* pmyData)
 {
-	char c = pmyData->bEnable ? '1' : '0';
-	Serial.print("bEnable:");
-	Serial.println(c);
+	char txt[64];
+	sprintf(txt, "bChangeZero:%d bChangeOne:%d",pmyData->bChangeZero,pmyData->bChangeOne);
+	Serial.println(txt);
 }
 
 // function for ZERO state
@@ -73,6 +75,16 @@ void PickUpFuncZero(void* pData)
 	PrintEnable ((MY_DATA*)pData);
 }
 
+int ChangeStateZero (void* pData)
+{
+	MY_DATA* pmyData = (MY_DATA*)pData;
+	if (pmyData->bChangeZero)
+	{
+		pmyData->bChangeZero = false;
+	}
+	return pmyData->bChangeZero;
+}
+
 // Function to ONE state
 void StatusFuncOne(void* pData)
 {
@@ -98,10 +110,14 @@ void PickUpFuncOne(void* pData)
 	PrintEnable ((MY_DATA*)pData);
 }
 
-int ChangeStateZero (void* pData)
+int ChangeStateOne (void* pData)
 {
 	MY_DATA* pmyData = (MY_DATA*)pData;
-	return pmyData->bEnable ? 1 : 0;
+	if (pmyData->bChangeOne)
+	{
+		pmyData->bChangeOne = false;
+	}
+	return pmyData->bChangeOne;
 }
 
 // 
@@ -115,7 +131,10 @@ void setup ()
 {
 	// Start the serial interface
 	Serial.begin(115200);
+	
 	bEnableStateMachine = false;
+	myData.bChangeZero  = false;
+	myData.bChangeOne   = false;
 	
 	// assign address of global data and cycle to Statemachine
 	StateMachine.AssignData(&myData, MS_CYCLE);
@@ -137,8 +156,8 @@ void setup ()
 							DropOutFuncOne,         // drop out function
 							nullptr,                // transition fucntion array
 							PickUpFuncOne,          // pick up function
-							nullptr,                // change state function
-							2000,                   // maximum allowed time to stack in states (0 = no max)
+							ChangeStateOne,         // change state function
+							10000,                  // maximum allowed time to stack in states (0 = no max)
 							0,                      // next State to go if exceeded the maximum time in the state
 							"One");                 // name of state
 							
@@ -159,7 +178,8 @@ void loop ()
 	if (Serial.available())
 	{
 		c = Serial.read();
-		myData.bEnable = c == 'E' ? true : false;
+		myData.bChangeZero  = c == '0' ? true : false;
+		myData.bChangeOne   = c == '1' ? true : false;
 		bEnableStateMachine = c == 'S' ? true : bEnableStateMachine;
 		bEnableStateMachine = c == 'T' ? false : bEnableStateMachine;
 		if (c == '?')
