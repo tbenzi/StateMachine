@@ -24,8 +24,9 @@
 
 #define NUM_STATES 2
 
-#include "T:\Arduino\StateMachine\src\Arduino\StateMachine.h"
-//#include "C:\arduino\Develop\StateMachine\src\Arduino\StateMachine.h"
+//#include "T:\Arduino\StateMachine\src\Arduino\StateMachine.h"
+#include "C:\arduino\Develop\StateMachine\src\Arduino\StateMachine.h"
+//#include "..\..\..\src\Arduino\StateMachine.h"
 
 #define MS_CYCLE 1000
 
@@ -77,12 +78,15 @@ void PickUpFuncZero(void* pData)
 
 int ChangeStateZero (void* pData)
 {
+	Serial.println("ChangeStateZero");
+	PrintEnable ((MY_DATA*)pData);
 	MY_DATA* pmyData = (MY_DATA*)pData;
 	if (pmyData->bChangeZero)
 	{
 		pmyData->bChangeZero = false;
+		return true;
 	}
-	return pmyData->bChangeZero;
+	return false;
 }
 
 // Function to ONE state
@@ -112,12 +116,15 @@ void PickUpFuncOne(void* pData)
 
 int ChangeStateOne (void* pData)
 {
+	Serial.println("ChangeStateOne");
+	PrintEnable ((MY_DATA*)pData);
 	MY_DATA* pmyData = (MY_DATA*)pData;
 	if (pmyData->bChangeOne)
 	{
 		pmyData->bChangeOne = false;
+		return true;
 	}
-	return pmyData->bChangeOne;
+	return false;
 }
 
 // 
@@ -125,6 +132,12 @@ myTransitionFunc pTransitionFuncZero[NUM_STATES] =
 {
 	nullptr,
 	TransitionFuncZeroToOne
+};
+
+myTransitionFunc pTransitionFuncOne[NUM_STATES] =
+{
+	nullptr,
+	nullptr
 };
 
 void setup ()
@@ -154,7 +167,7 @@ void setup ()
 	StateMachine.AssignState(1,						// state index (zero based)
 							StatusFuncOne,          // state function
 							DropOutFuncOne,         // drop out function
-							nullptr,                // transition fucntion array
+							pTransitionFuncOne,     // transition fucntion array
 							PickUpFuncOne,          // pick up function
 							ChangeStateOne,         // change state function
 							10000,                  // maximum allowed time to stack in states (0 = no max)
@@ -164,12 +177,12 @@ void setup ()
 	// Enable buitin log
 	StateMachine.EnableLog(true);
 	
+	delay(500);
 	// check the consitency of statemachine build data
 	Serial.println(StateMachine.GetInitError ());
 	
 	// 
 	Serial.println(StateMachine.GetInitErrorString());
-
 }
 
 void loop ()
@@ -178,8 +191,8 @@ void loop ()
 	if (Serial.available())
 	{
 		c = Serial.read();
-		myData.bChangeZero  = c == '0' ? true : false;
-		myData.bChangeOne   = c == '1' ? true : false;
+		myData.bChangeZero  = c == '0' ? true : myData.bChangeZero;
+		myData.bChangeOne   = c == '1' ? true : myData.bChangeOne;
 		bEnableStateMachine = c == 'S' ? true : bEnableStateMachine;
 		bEnableStateMachine = c == 'T' ? false : bEnableStateMachine;
 		if (c == '?')
@@ -192,6 +205,7 @@ void loop ()
 		StateMachine.Manage();
 		Serial.println(StateMachine.GetStatusName());
 		Serial.println(StateMachine.GetStatusInd());
+		bEnableStateMachine = false;
 	}
 	delay(MS_CYCLE);
 }
