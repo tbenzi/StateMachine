@@ -66,7 +66,7 @@ class CStateMachine
 		myDropOutFunc m_fDropOut[NUM_STATES];					// DropOut (from a state) functions vector
 		myTransitionFunc m_fTransition[NUM_STATES][NUM_STATES];	// Transition (from a specify state to another) functions vector
 		myPickUpFunc m_fPickUp[NUM_STATES];					// PickUp (into a state) functions vector
-		myChangeStatusFunc m_fChangeStatusFunc[NUM_STATES];	// ChangeStatus functions vector
+		myChangeStatusFunc m_fChangeStatus[NUM_STATES];	// ChangeStatus functions vector
 		const char* m_StatusName[NUM_STATES];					// State names vector
 		int m_MaxMsInStatus[NUM_STATES];						// Maximum allowed time to stack in any states vector 
 		int m_MsInStatus[NUM_STATES];
@@ -122,7 +122,7 @@ class CStateMachine
 						m_StateError = NO_CHANGE_STATE_DEFINED;
 					}
 				}
-				if (m_fChangeStatusFunc[ind] != nullptr)
+				if (m_fChangeStatus[ind] != nullptr)
 				{
 					m_StateError = ALREADY_DEFINED_STATE;
 				}
@@ -150,7 +150,7 @@ class CStateMachine
 					m_fTransition[ind][i] = fTransition[i];
 				}
 				m_fPickUp[ind] = fPickUp;
-				m_fChangeStatusFunc[ind] = fChangeStatusFunc;
+				m_fChangeStatus[ind] = fChangeStatusFunc;
 				m_MaxMsInStatus[ind] = MaxMsInStatus;
 				m_NextStatusIfExceededMaxMsInStatus[ind] = NextStatusIfOverMaxMsInStatus;
 				m_StatusName [ind] = stausName;
@@ -204,9 +204,9 @@ class CStateMachine
 			}
 			else
 			{
-				if (m_fChangeStatusFunc[m_actualStatus] != nullptr)
+				if (m_fChangeStatus[m_actualStatus] != nullptr)
 				{
-					m_actualStatus = (*m_fChangeStatusFunc[m_actualStatus])(m_pStructData);
+					m_actualStatus = (*m_fChangeStatus[m_actualStatus])(m_pStructData);
 				}
 			}
 			Serial.print("m_actualStatus:");
@@ -245,5 +245,34 @@ class CStateMachine
 		int GetStatusInd() { return m_actualStatus; };
 		const char* GetStatusName () { return m_StatusName[m_actualStatus]; };
 		void EnableLog (bool b_enable = false) { m_bLogEnable = b_enable; };
+		
+		void ShowStateData ()
+		{
+			char txt[64];
+			sprintf(txt,"pStructData: %s",m_pStructData!=nullptr?"defined":"-");
+			Serial.println(txt);
+			for (int i = 0; i < NUM_STATES; i++)
+			{
+				sprintf(txt,"ind:%d - %s", i, m_StatusName[i]);
+				Serial.println(txt);
+				sprintf(txt,"fStatus:  %s",m_fStatus[i]!=nullptr?"defined":"-");
+				Serial.println(txt);
+				sprintf(txt,"fDropOut: %s",m_fDropOut[i]!=nullptr?"defined":"-");
+				Serial.println(txt);
+				for (int j = 0; j < NUM_STATES; j++)
+				{
+					sprintf(txt,"fTransition[%d]: %s",j,m_fTransition[i][j]!=nullptr?"defined":"-");
+					Serial.println(txt);
+				}
+				sprintf(txt,"fPickUp: %s",m_fPickUp[i]!=nullptr?"defined":"-");
+				Serial.println(txt);
+				sprintf(txt,"fChangeStatusFunc: %s",m_fChangeStatus[i]!=nullptr?"defined":"-");
+				Serial.println(txt);
+				sprintf(txt,"MaxMsInStatus: %d",m_MaxMsInStatus[i]);
+				Serial.println(txt);
+				sprintf(txt,"NextStatusIfExceededMaxMsInStatus: %d",m_NextStatusIfExceededMaxMsInStatus[i]);
+				Serial.println(txt);
+			}
+		}
 };
 

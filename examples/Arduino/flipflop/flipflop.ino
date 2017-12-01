@@ -24,10 +24,12 @@
 
 #define NUM_STATES 2
 
-//#include "T:\Arduino\StateMachine\src\Arduino\StateMachine.h"
-#include "C:\arduino\Develop\StateMachine\src\Arduino\StateMachine.h"
+#include "T:\Arduino\StateMachine\src\Arduino\StateMachine.h"
+//#include "C:\arduino\Develop\StateMachine\src\Arduino\StateMachine.h"
 
 #define MS_CYCLE 1000
+
+bool bEnableStateMachine;
 
 // global data for Statemachine ----------------
 typedef struct { bool bEnable;} MY_DATA;
@@ -113,7 +115,8 @@ void setup ()
 {
 	// Start the serial interface
 	Serial.begin(115200);
-
+	bEnableStateMachine = false;
+	
 	// assign address of global data and cycle to Statemachine
 	StateMachine.AssignData(&myData, MS_CYCLE);
 	
@@ -152,14 +155,24 @@ void setup ()
 
 void loop ()
 {
+	char c;
 	if (Serial.available())
 	{
-		char c = Serial.read();
+		c = Serial.read();
 		myData.bEnable = c == 'E' ? true : false;
+		bEnableStateMachine = c == 'S' ? true : bEnableStateMachine;
+		bEnableStateMachine = c == 'T' ? false : bEnableStateMachine;
+		if (c == '?')
+		{
+			StateMachine.ShowStateData();
+		}
 	}
-	StateMachine.Manage();
-	Serial.println(StateMachine.GetStatusName());
-	Serial.println(StateMachine.GetStatusInd());
+	if (bEnableStateMachine)
+	{
+		StateMachine.Manage();
+		Serial.println(StateMachine.GetStatusName());
+		Serial.println(StateMachine.GetStatusInd());
+	}
 	delay(MS_CYCLE);
 }
 
