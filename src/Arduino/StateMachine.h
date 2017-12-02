@@ -62,11 +62,11 @@ STR_ERR stateMachineErrorString[MAX_NUM_ERROR] =
 
 class CStateMachine
 {
-		myStatusFunc m_fStatus[NUM_STATES];					// State functions vector
+		myStatusFunc m_fStatus[NUM_STATES];						// State functions vector
 		myDropOutFunc m_fDropOut[NUM_STATES];					// DropOut (from a state) functions vector
 		myTransitionFunc m_fTransition[NUM_STATES][NUM_STATES];	// Transition (from a specify state to another) functions vector
-		myPickUpFunc m_fPickUp[NUM_STATES];					// PickUp (into a state) functions vector
-		myChangeStatusFunc m_fChangeStatus[NUM_STATES];	// ChangeStatus functions vector
+		myPickUpFunc m_fPickUp[NUM_STATES];						// PickUp (into a state) functions vector
+		myChangeStatusFunc m_fChangeStatus[NUM_STATES];			// ChangeStatus functions vector
 		const char* m_StatusName[NUM_STATES];					// State names vector
 		int m_MaxMsInStatus[NUM_STATES];						// Maximum allowed time to stack in any states vector 
 		int m_MsInStatus[NUM_STATES];
@@ -92,6 +92,9 @@ class CStateMachine
 		};
 		virtual ~CStateMachine() {};
 		
+//
+// AssignData
+//
 		void AssignData(void* pstruct_data = nullptr, int msecCycle = 0)
 		{
 			if (m_pStructData == nullptr)
@@ -101,11 +104,13 @@ class CStateMachine
 			m_pStructData = pstruct_data;
 			m_msecCycle = msecCycle;
 		};
-		
+//
+// AssignState
+//
 		void AssignState(int ind,
 						myStatusFunc 			fStatus = nullptr,
 						myDropOutFunc 			fDropOut = nullptr,
-						myTransitionFunc* 		fTransition = nullptr,	 //*************************************
+						myTransitionFunc* 		fTransition = nullptr,
 						myPickUpFunc			fPickUp = nullptr,
 						myChangeStatusFunc		fChangeStatusFunc = nullptr,
 						int						MaxMsInStatus = 0,
@@ -154,25 +159,30 @@ class CStateMachine
 				m_MaxMsInStatus[ind] = MaxMsInStatus;
 				m_NextStatusIfExceededMaxMsInStatus[ind] = NextStatusIfOverMaxMsInStatus;
 				m_StatusName [ind] = stausName;
-				Serial.print("ind:");
-				Serial.println(ind);
-				Serial.print("MaxMsInStatus:");
-				Serial.println(MaxMsInStatus);
-				Serial.print("NextStatusIfOverMaxMsInStatus:");
-				Serial.println(NextStatusIfOverMaxMsInStatus);
 			}
 			else
 			{
 				m_StateError = IND_STATE_OVER_MAX;
 			}
 		};
-		
+//
+// Manage 
+//
 		void Manage()
 		{
-			Serial.print("******** m_actualStatus:");
-			Serial.println(m_actualStatus);
+			char txt[124];
+			if (m_bLogEnable)
+			{
+				sprintf(txt,"StateMachine::Manage - State: %s [%d] -------- ", m_StatusName[m_actualStatus],m_actualStatus);
+				Serial.println(txt);
+			}
 			if (m_StateError != NO_ERROR)
 			{
+				if (m_bLogEnable)
+				{
+					sprintf(txt,"StateMachine::Manage - Init Data Error:%d Exit!",m_StateError);
+					Serial.println(txt);
+				}
 				return;
 			}
 			bool bMaxMsInStatus = false;
@@ -180,6 +190,11 @@ class CStateMachine
 			// Things to do in actual state
 			if (*m_fStatus[m_actualStatus] != nullptr)
 			{
+				if (m_bLogEnable)
+				{
+					sprintf(txt,"StateMachine::Manage - Call State function");
+					Serial.println(txt);
+				}
 				(*m_fStatus[m_actualStatus])(m_pStructData);
 			}
 			
@@ -187,30 +202,37 @@ class CStateMachine
 			// if exceeded the maximum, perform a state change
 			// otherwise
 			// call the chageStatus function
-			Serial.print("m_MaxMsInStatus:");
-			Serial.println(m_MaxMsInStatus[m_actualStatus]);
-			Serial.print("m_MsInStatus:");
-			Serial.println(m_MsInStatus[m_actualStatus]);
 			if (m_MaxMsInStatus[m_actualStatus] > 0)
 			{
-				Serial.print(">0 ****************");
 				m_MsInStatus[m_actualStatus] += m_msecCycle;
+				if (m_bLogEnable)
+				{
+					sprintf(txt,"StateMachine::Manage - MaxMsInStatus:%d Check the stay time in the state, now is:%d",
+								m_MaxMsInStatus[m_actualStatus],
+								m_MsInStatus[m_actualStatus]);
+					Serial.println(txt);
+				}
 				bMaxMsInStatus = m_MsInStatus[m_actualStatus] >= m_MaxMsInStatus[m_actualStatus];
 			}
 			if (bMaxMsInStatus)
 			{
-				m_actualStatus = m_NextStatusIfExceededMaxMsInStatus[m_actualStatus];
 				m_MsInStatus[m_actualStatus] = 0;
+				m_actualStatus = m_NextStatusIfExceededMaxMsInStatus[m_actualStatus];
+				if (m_bLogEnable)
+				{
+					sprintf(txt,"StateMachine::Manage - Exceeded the maximum, perform a state change to:, m_actualStatus");
+					Serial.println(txt);
+				}
 			}
 			else
 			{
 				if (m_fChangeStatus[m_actualStatus] != nullptr)
 				{
 					m_actualStatus = (*m_fChangeStatus[m_actualStatus])(m_pStructData);
+					sprintf(txt,"StateMachine::Manage - Called ChangeState function go in:%d",m_actualStatus);
+					Serial.println(txt);
 				}
 			}
-			Serial.print("m_actualStatus:");
-			Serial.println(m_actualStatus);
 			
 			// if the state is changed call the defined functions
 			if (m_actualStatus != m_oldStatus)
@@ -218,20 +240,35 @@ class CStateMachine
 				if (m_bLogEnable)
 				{
 					char txt[64];
-					sprintf(txt, "Change from %s to %s", m_StatusName[m_oldStatus], m_StatusName[m_actualStatus]);
+					sprintf(txt, "StateMachine::Manage - Change from %s to %s", m_StatusName[m_oldStatus], m_StatusName[m_actualStatus]);
 					Serial.println(txt);
 				}
 				if (*m_fDropOut[m_oldStatus] != nullptr)
 				{
+					if (m_bLogEnable)
+					{
+						sprintf(txt,"StateMachine::Manage - Call DropOut function");
+						Serial.println(txt);
+					}
 					(*m_fDropOut[m_oldStatus])(m_pStructData);
 				}
-				if (*m_fTransition[m_oldStatus][m_actualStatus] != nullptr)	 //*************************************
+				if (*m_fTransition[m_oldStatus][m_actualStatus] != nullptr)
 				{
-					(*m_fTransition[m_oldStatus][m_actualStatus])(m_pStructData);//*************************************
+					if (m_bLogEnable)
+					{
+						sprintf(txt,"StateMachine::Manage - Call Transition function");
+						Serial.println(txt);
+					}
+					(*m_fTransition[m_oldStatus][m_actualStatus])(m_pStructData);
 				}
 				m_oldStatus = m_actualStatus;
 				if (*m_fPickUp[m_oldStatus] != nullptr)
 				{
+					if (m_bLogEnable)
+					{
+						sprintf(txt,"StateMachine::Manage - Call PickUp function");
+						Serial.println(txt);
+					}
 					(*m_fPickUp[m_oldStatus])(m_pStructData);
 				}
 			}
@@ -245,15 +282,18 @@ class CStateMachine
 		int GetStatusInd() { return m_actualStatus; };
 		const char* GetStatusName () { return m_StatusName[m_actualStatus]; };
 		void EnableLog (bool b_enable = false) { m_bLogEnable = b_enable; };
-		
+//
+// ShowStateData 
+//
 		void ShowStateData ()
 		{
 			char txt[64];
+			Serial.println(" ----- StateMachine::ShowStateData ------");
 			sprintf(txt,"pStructData: %s",m_pStructData!=nullptr?"defined":"-");
 			Serial.println(txt);
 			for (int i = 0; i < NUM_STATES; i++)
 			{
-				sprintf(txt,"ind:%d - %s", i, m_StatusName[i]);
+				sprintf(txt,"----- ind:%d - %s -----", i, m_StatusName[i]);
 				Serial.println(txt);
 				sprintf(txt,"fStatus:  %s",m_fStatus[i]!=nullptr?"defined":"-");
 				Serial.println(txt);
