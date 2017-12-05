@@ -25,9 +25,6 @@
 // ******************************
 // CODE EMBRYO UNDER DEVELOPMENT
 // ******************************
-#ifndef NUM_STATES
-ERROR_DEFINE_NUM_STATES_VALUE
-#endif
 
 typedef void    (*myStatusFunc)(void* pStructData);
 typedef void    (*myDropOutFunc)(void* pStructData);
@@ -44,6 +41,7 @@ typedef enum {  NO_ERROR                    = 0,
                 NO_CHANGE_STATE_DEFINED     = 6,
                 WRONG_IND_STATE_MAX_IN_TRANS = 7,
                 MALLOC_ERROR = 8,
+				NUM_STATES_EQ_ZERO = 9,
                 MAX_NUM_ERROR 
 } E_STATE_MACHINE_ERROR;
 
@@ -59,7 +57,8 @@ STR_ERR stateMachineErrorString[MAX_NUM_ERROR] =
              {"IND_STATE_OVER_MAX_IN_TRANS"},
              {"NO_CHANGE_STATE_DEFINED"},
              {"WRONG_IND_STATE_MAX_IN_TRANS"},
-             {"MALLOC_ERROR"}
+             {"MALLOC_ERROR"},
+			 {"NUM_STATES_EQ_ZERO"}
 };
 
 typedef const char* myPName;
@@ -122,12 +121,18 @@ class CStateMachine
             }
 			return true;
 		}
+		
 //
 // AssignData
 //
-        bool AssignData(int num_states, void* pstruct_data = nullptr, int msecCycle = 0)
+        bool AssignData(int num_states = 0, void* pstruct_data = nullptr, int msecCycle = 0)
         {
             m_numStates     = num_states;
+			if (num_states == 0)
+			{
+                m_StateError = NUM_STATES_EQ_ZERO;
+				return false;
+			}
             m_pStructData   = pstruct_data;
             m_msecCycle     = msecCycle;
             for (int i = 0; i < num_states; i++)
@@ -136,12 +141,12 @@ class CStateMachine
             }
             if (!MemAlloc (m_fStatus,       sizeof(myStatusFunc*)*num_states))   return false;
             if (!MemAlloc (m_fDropOut,      sizeof(myDropOutFunc*)*num_states))  return false;
-            if (!MemAlloc (m_fTransition,   sizeof(m_fTransition**)*num_states)) return false;
+            if (!MemAlloc (m_fTransition,   sizeof(myTransitionFunc*)*num_states)) return false;
 			for (int i = 0; i < num_states; i++)
 			{
-				if (!MemAlloc (m_fTransition[i], sizeof(m_fTransition**)*num_states)) return false;
+				if (!MemAlloc (m_fTransition[i], sizeof(myTransitionFunc*)*num_states)) return false;
 			}
-            if (!MemAlloc (m_fPickUp,       sizeof(m_fPickUp*)*num_states))          return false;
+            if (!MemAlloc (m_fPickUp,       sizeof(myPickUpFunc*)*num_states))       return false;
             if (!MemAlloc (m_fChangeStatus, sizeof(myChangeStatusFunc*)*num_states)) return false;
             if (!MemAlloc (m_StatusName,    sizeof(myPName*)*num_states))            return false;
             if (!MemAlloc (m_MaxMsInStatus, sizeof(int*)*num_states))                return false;
@@ -162,7 +167,7 @@ class CStateMachine
                         int                     NextStatusIfOverMaxMsInStatus = 0,
                         const char*             stausName = nullptr) 
         {
-            if (ind < num_states)
+            if (ind < m_numStates)
             {   
                 // Check Parameters
                 if (fChangeStatusFunc == nullptr)
@@ -184,7 +189,7 @@ class CStateMachine
                 {
                     m_StateError = WRONG_IND_STATE_MAX_IN_TRANS;
                 }
-                if (NextStatusIfOverMaxMsInStatus >= NUM_STATES)
+                if (NextStatusIfOverMaxMsInStatus >= m_numStates)
                 {
                     m_StateError = IND_STATE_OVER_MAX_IN_TRANS;
                 }
@@ -195,7 +200,7 @@ class CStateMachine
                 // Parameters are OK
                 m_fStatus[ind] = fStatus;
                 m_fDropOut[ind] = fDropOut;
-                for (int i = 0; i < NUM_STATES; i++)
+                for (int i = 0; i < m_numStates; i++)
                 {
                     m_fTransition[ind][i] = fTransition[i];
                 }
@@ -336,7 +341,7 @@ class CStateMachine
             Serial.println(" ----- StateMachine::ShowStateData ------");
             sprintf(txt,"pStructData: %s",m_pStructData!=nullptr?"defined":"-");
             Serial.println(txt);
-            for (int i = 0; i < NUM_STATES; i++)
+            for (int i = 0; i < m_numStates; i++)
             {
                 sprintf(txt,"----- ind:%d - %s -----", i, m_StatusName[i]);
                 Serial.println(txt);
@@ -344,7 +349,7 @@ class CStateMachine
                 Serial.println(txt);
                 sprintf(txt,"fDropOut: %s",m_fDropOut[i]!=nullptr?"defined":"-");
                 Serial.println(txt);
-                for (int j = 0; j < NUM_STATES; j++)
+                for (int j = 0; j < m_numStates; j++)
                 {
                     sprintf(txt,"fTransition[%d]: %s",j,m_fTransition[i][j]!=nullptr?"defined":"-");
                     Serial.println(txt);
