@@ -103,8 +103,18 @@ class CStateMachine
 				m_MaxMsInStatus[i] = 0;
 			}
 		};
-		virtual ~CStateMachine() {};
-		
+		virtual ~CStateMachine() 
+		{
+			free(m_fStatus);
+			free(m_fDropOut);
+			free(m_fTransition);
+			free(m_fPickUp);
+			free(m_fChangeStatus);
+			free(m_StatusName);
+			free(m_MaxMsInStatus);
+			free(m_MsInStatus);
+			free(m_NextStatusIfExceededMaxMsInStatus);
+		};
 //
 // AssignData
 //
@@ -113,55 +123,55 @@ class CStateMachine
 			m_numStates 	= num_states;
 			m_pStructData 	= pstruct_data;
 			m_msecCycle 	= msecCycle;
-			m_fStatus 	  	= malloc(sizeof(myStatusFunc*)*num_states);						// State functions vector
+			m_fStatus 	  	= (myStatusFunc*)malloc(sizeof(myStatusFunc*)*num_states);						// State functions vector
 			if (m_fStatus == nullptr)
 			{
 				m_StateError = IND_STATE_OVER_MAX_IN_TRANS;
 				return false;
 			}
-			m_fDropOut 	  	= malloc(sizeof(myDropOutFunc*)*num_states);					// DropOut (from a state) functions vector
+			m_fDropOut 	  	= (myDropOutFunc*)malloc(sizeof(myDropOutFunc*)*num_states);					// DropOut (from a state) functions vector
 			if (m_fDropOut == nullptr)
 			{
 				m_StateError = IND_STATE_OVER_MAX_IN_TRANS;
 				return false;
 			}
-			m_fTransition 	= malloc(sizeof(myTransitionFunc**)*num_states);	// Transition (from a specify state to another) functions vector
+			m_fTransition 	= (myTransitionFunc**)malloc(sizeof(myTransitionFunc**)*num_states);	// Transition (from a specify state to another) functions vector
 			if (m_fTransition == nullptr)
 			{
 				m_StateError = IND_STATE_OVER_MAX_IN_TRANS;
 				return false;
 			}
-			m_fPickUp 	  	= malloc(sizeof(myPickUpFunc*)*num_states);						// PickUp (into a state) functions vector
+			m_fPickUp 	  	= (myPickUpFunc*)malloc(sizeof(myPickUpFunc*)*num_states);						// PickUp (into a state) functions vector
 			if (m_fPickUp == nullptr)
 			{
 				m_StateError = IND_STATE_OVER_MAX_IN_TRANS;
 				return false;
 			}
-			m_fChangeStatus = malloc(sizeof(myChangeStatusFunc*)*num_states);			// ChangeStatus functions vector
+			m_fChangeStatus = (myChangeStatusFunc*)malloc(sizeof(myChangeStatusFunc*)*num_states);			// ChangeStatus functions vector
 			if (m_fChangeStatus == nullptr)
 			{
 				m_StateError = IND_STATE_OVER_MAX_IN_TRANS;
 				return false;
 			}
-			m_StatusName 	= malloc(sizeof(myPName*)*num_states);					// State names vector
+			m_StatusName 	= (myPName*)malloc(sizeof(myPName*)*num_states);					// State names vector
 			if (m_StatusName == nullptr)
 			{
 				m_StateError = IND_STATE_OVER_MAX_IN_TRANS;
 				return false;
 			}
-			m_MaxMsInStatus = malloc(sizeof(int*)*num_states);					 					// Maximum allowed time to stack in any states vector 
+			m_MaxMsInStatus = (int*)malloc(sizeof(int*)*num_states);					 					// Maximum allowed time to stack in any states vector 
 			if (m_MaxMsInStatus == nullptr)
 			{
 				m_StateError = IND_STATE_OVER_MAX_IN_TRANS;
 				return false;
 			}
-			m_MsInStatus 	= malloc(sizeof(int*)*num_states); 				
+			m_MsInStatus 	= (int*)malloc(sizeof(int*)*num_states); 				
 			if (m_MsInStatus == nullptr)
 			{
 				m_StateError = IND_STATE_OVER_MAX_IN_TRANS;
 				return false;
 			}
-			m_NextStatusIfExceededMaxMsInStatus = malloc(sizeof(int*)*num_states);					// Next State to go if exceeded the maximum time in the state
+			m_NextStatusIfExceededMaxMsInStatus = (int*)malloc(sizeof(int*)*num_states);					// Next State to go if exceeded the maximum time in the state
 			if (m_fStatus == nullptr)
 			{
 				m_NextStatusIfExceededMaxMsInStatus = IND_STATE_OVER_MAX_IN_TRANS;
@@ -182,7 +192,7 @@ class CStateMachine
 						int						NextStatusIfOverMaxMsInStatus = 0,
 						const char*				stausName = nullptr) 
 		{
-			if (ind < NUM_STATES)
+			if (ind < num_states)
 			{	
 				// Check Parameters
 				if (fChangeStatusFunc == nullptr)
