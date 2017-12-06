@@ -66,49 +66,49 @@ typedef const char* myPName;
 class CStateMachine
 {
         myStatusFunc*       m_fStatus;                      // State functions vector
-        myDropOutFunc*      m_fDropOut;                 // DropOut (from a state) functions vector
-        myTransitionFunc**  m_fTransition;  // Transition (from a specify state to another) functions vector
+        myDropOutFunc*      m_fDropOut;                     // DropOut (from a state) functions vector
+        myTransitionFunc**  m_fTransition;                  // Transition (from a specify state to another) functions vector
         myPickUpFunc*       m_fPickUp;                      // PickUp (into a state) functions vector
-        myChangeStatusFunc* m_fChangeStatus;            // ChangeStatus functions vector
+        myChangeStatusFunc* m_fChangeStatus;                // ChangeStatus functions vector
         myPName*            m_StatusName;                   // State names vector
-        int*                m_MaxMsInStatus;                        // Maximum allowed time to stack in any states vector 
-        int*                m_MsInStatus;
-        int*                m_NextStatusIfExceededMaxMsInStatus;    // Next State to go if exceeded the maximum time in the state
-        int m_numStates;
-        int m_actualStatus;
-        int m_oldStatus;
-        void* m_pStructData;
-        bool m_bLogEnable;
-        int m_msecCycle;
-        E_STATE_MACHINE_ERROR m_StateError;
+        int*                m_MaxMsInStatus;                // Maximum allowed time to stack in any states vector 
+        int*                m_MsInStatus;                   // Counter ms in state
+        int*                m_NextStatusIfExceededMaxMsInStatus; // Next State to go if exceeded the maximum time in the state
+        int m_numStates;           // states number
+        int m_actualState;         // actual active state 
+        int m_oldStatus;           // previous active state
+        void* m_pStructData;       // pointer tu user data
+        bool m_bLogEnable;         // log enable
+        int m_msecCycle;           // 
+        E_STATE_MACHINE_ERROR m_StateError; // error code detected
     public:
     
         CStateMachine()
         {
-            m_fStatus = nullptr;                        // State functions vector
-            m_fDropOut = nullptr;                   // DropOut (from a state) functions vector
-            m_fTransition = nullptr;    // Transition (from a specify state to another) functions vector
-            m_fPickUp = nullptr;                        // PickUp (into a state) functions vector
-            m_fChangeStatus = nullptr;          // ChangeStatus functions vector
-            m_StatusName = nullptr;                 // State names vector
+            m_fStatus = nullptr;        
+            m_fDropOut = nullptr;       
+            m_fTransition = nullptr;    
+            m_fPickUp = nullptr;        
+            m_fChangeStatus = nullptr;  
+            m_StatusName = nullptr;     
             m_pStructData = nullptr;
             m_StateError = NO_ERROR;
             m_numStates = 0;
-            m_actualStatus = 0;
+            m_actualState = 0;
             m_oldStatus = 0;
             m_bLogEnable = false;
         };
         virtual ~CStateMachine() 
         {
-            if(m_fStatus!= nullptr)free(m_fStatus);
-            if(m_fDropOut!= nullptr)free(m_fDropOut);
-            if(m_fTransition!= nullptr)free(m_fTransition);
-            if(m_fPickUp!= nullptr)free(m_fPickUp);
-            if(m_fChangeStatus!= nullptr)free(m_fChangeStatus);
-            if(m_StatusName!= nullptr)free(m_StatusName);
-            if(m_MaxMsInStatus!= nullptr)free(m_MaxMsInStatus);
-            if(m_MsInStatus!= nullptr)free(m_MsInStatus);
-            if(m_NextStatusIfExceededMaxMsInStatus!= nullptr)free(m_NextStatusIfExceededMaxMsInStatus);
+            if(m_fStatus!= nullptr) free(m_fStatus);
+            if(m_fDropOut!= nullptr )free(m_fDropOut);
+            if(m_fTransition!= nullptr) free(m_fTransition);
+            if(m_fPickUp!= nullptr) free(m_fPickUp);
+            if(m_fChangeStatus!= nullptr) free(m_fChangeStatus);
+            if(m_StatusName!= nullptr) free(m_StatusName);
+            if(m_MaxMsInStatus!= nullptr) free(m_MaxMsInStatus);
+            if(m_MsInStatus!= nullptr) free(m_MsInStatus);
+            if(m_NextStatusIfExceededMaxMsInStatus!= nullptr) free(m_NextStatusIfExceededMaxMsInStatus);
         };
 		
 		bool MemAlloc (void* pv, size_t size)
@@ -158,14 +158,14 @@ class CStateMachine
 // AssignState
 //
         void AssignState(int ind,
-                        myStatusFunc            fStatus = nullptr,
-                        myDropOutFunc           fDropOut = nullptr,
-                        myTransitionFunc*       fTransition = nullptr,
-                        myPickUpFunc            fPickUp = nullptr,
-                        myChangeStatusFunc      fChangeStatusFunc = nullptr,
-                        int                     MaxMsInStatus = 0,
-                        int                     NextStatusIfOverMaxMsInStatus = 0,
-                        const char*             stausName = nullptr) 
+                        myStatusFunc       fStatus = nullptr,
+                        myDropOutFunc      fDropOut = nullptr,
+                        myTransitionFunc*  fTransition = nullptr,
+                        myPickUpFunc       fPickUp = nullptr,
+                        myChangeStatusFunc fChangeStatusFunc = nullptr,
+                        int                MaxMsInStatus = 0,
+                        int                NextStatusIfOverMaxMsInStatus = 0,
+                        const char*        stausName = nullptr) 
         {
             if (ind < m_numStates)
             {   
@@ -223,7 +223,7 @@ class CStateMachine
             char txt[124];
             if (m_bLogEnable)
             {
-                sprintf(txt,"StateMachine::Manage - State: %s [%d] -------- ", m_StatusName[m_actualStatus],m_actualStatus);
+                sprintf(txt,"StateMachine::Manage - State: %s [%d] -------- ", m_StatusName[m_actualState],m_actualState);
                 Serial.println(txt);
             }
             if (m_StateError != NO_ERROR)
@@ -238,59 +238,59 @@ class CStateMachine
             bool bMaxMsInStatus = false;
             
             // Things to do in actual state
-            if (*m_fStatus[m_actualStatus] != nullptr)
+            if (*m_fStatus[m_actualState] != nullptr)
             {
                 if (m_bLogEnable)
                 {
                     sprintf(txt,"StateMachine::Manage - Call State function");
                     Serial.println(txt);
                 }
-                (*m_fStatus[m_actualStatus])(m_pStructData);
+                (*m_fStatus[m_actualState])(m_pStructData);
             }
             
             // Check the stay time in the state
             // if exceeded the maximum, perform a state change
             // otherwise
             // call the chageStatus function
-            if (m_MaxMsInStatus[m_actualStatus] > 0)
+            if (m_MaxMsInStatus[m_actualState] > 0)
             {
-                m_MsInStatus[m_actualStatus] += m_msecCycle;
+                m_MsInStatus[m_actualState] += m_msecCycle;
                 if (m_bLogEnable)
                 {
                     sprintf(txt,"StateMachine::Manage - MaxMsInStatus:%d Check the stay time in the state, now is:%d",
-                                m_MaxMsInStatus[m_actualStatus],
-                                m_MsInStatus[m_actualStatus]);
+                                m_MaxMsInStatus[m_actualState],
+                                m_MsInStatus[m_actualState]);
                     Serial.println(txt);
                 }
-                bMaxMsInStatus = m_MsInStatus[m_actualStatus] >= m_MaxMsInStatus[m_actualStatus];
+                bMaxMsInStatus = m_MsInStatus[m_actualState] >= m_MaxMsInStatus[m_actualState];
             }
             if (bMaxMsInStatus)
             {
-                m_MsInStatus[m_actualStatus] = 0;
-                m_actualStatus = m_NextStatusIfExceededMaxMsInStatus[m_actualStatus];
+                m_MsInStatus[m_actualState] = 0;
+                m_actualState = m_NextStatusIfExceededMaxMsInStatus[m_actualState];
                 if (m_bLogEnable)
                 {
-                    sprintf(txt,"StateMachine::Manage - Exceeded the maximum, perform a state change to:, m_actualStatus");
+                    sprintf(txt,"StateMachine::Manage - Exceeded the maximum, perform a state change to:, m_actualState");
                     Serial.println(txt);
                 }
             }
             else
             {
-                if (m_fChangeStatus[m_actualStatus] != nullptr)
+                if (m_fChangeStatus[m_actualState] != nullptr)
                 {
-                    m_actualStatus = (*m_fChangeStatus[m_actualStatus])(m_pStructData);
-                    sprintf(txt,"StateMachine::Manage - Called ChangeState function go in:%d",m_actualStatus);
+                    m_actualState = (*m_fChangeStatus[m_actualState])(m_pStructData);
+                    sprintf(txt,"StateMachine::Manage - Called ChangeState function go in:%d",m_actualState);
                     Serial.println(txt);
                 }
             }
             
             // if the state is changed call the defined functions
-            if (m_actualStatus != m_oldStatus)
+            if (m_actualState != m_oldStatus)
             {
                 if (m_bLogEnable)
                 {
                     char txt[64];
-                    sprintf(txt, "StateMachine::Manage - Change from %s to %s", m_StatusName[m_oldStatus], m_StatusName[m_actualStatus]);
+                    sprintf(txt, "StateMachine::Manage - Change from %s to %s", m_StatusName[m_oldStatus], m_StatusName[m_actualState]);
                     Serial.println(txt);
                 }
                 if (*m_fDropOut[m_oldStatus] != nullptr)
@@ -302,16 +302,16 @@ class CStateMachine
                     }
                     (*m_fDropOut[m_oldStatus])(m_pStructData);
                 }
-                if (*m_fTransition[m_oldStatus][m_actualStatus] != nullptr)
+                if (*m_fTransition[m_oldStatus][m_actualState] != nullptr)
                 {
                     if (m_bLogEnable)
                     {
                         sprintf(txt,"StateMachine::Manage - Call Transition function");
                         Serial.println(txt);
                     }
-                    (*m_fTransition[m_oldStatus][m_actualStatus])(m_pStructData);
+                    (*m_fTransition[m_oldStatus][m_actualState])(m_pStructData);
                 }
-                m_oldStatus = m_actualStatus;
+                m_oldStatus = m_actualState;
                 if (*m_fPickUp[m_oldStatus] != nullptr)
                 {
                     if (m_bLogEnable)
@@ -329,8 +329,8 @@ class CStateMachine
         
         const char* GetInitErrorString() { return stateMachineErrorString[m_StateError].s; };
 
-        int GetStatusInd() { return m_actualStatus; };
-        const char* GetStatusName () { return m_StatusName[m_actualStatus]; };
+        int GetStatusInd() { return m_actualState; };
+        const char* GetStatusName () { return m_StatusName[m_actualState]; };
         void EnableLog (bool b_enable = false) { m_bLogEnable = b_enable; };
 //
 // ShowStateData 
