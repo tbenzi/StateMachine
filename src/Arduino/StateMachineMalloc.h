@@ -41,7 +41,7 @@ typedef enum {  NO_ERROR                    = 0,
                 NO_CHANGE_STATE_DEFINED     = 6,
                 WRONG_IND_STATE_MAX_IN_TRANS = 7,
                 MALLOC_ERROR = 8,
-				NUM_STATES_EQ_ZERO = 9,
+                NUM_STATES_EQ_ZERO = 9,
                 MAX_NUM_ERROR 
 } E_STATE_MACHINE_ERROR;
 
@@ -58,7 +58,7 @@ STR_ERR stateMachineErrorString[MAX_NUM_ERROR] =
              {"NO_CHANGE_STATE_DEFINED"},
              {"WRONG_IND_STATE_MAX_IN_TRANS"},
              {"MALLOC_ERROR"},
-			 {"NUM_STATES_EQ_ZERO"}
+             {"NUM_STATES_EQ_ZERO"}
 };
 
 typedef const char* myPName;
@@ -110,29 +110,38 @@ class CStateMachine
             if(m_MsInStatus!= nullptr) free(m_MsInStatus);
             if(m_NextStatusIfExceededMaxMsInStatus!= nullptr) free(m_NextStatusIfExceededMaxMsInStatus);
         };
-		
-		bool MemAlloc (void* pv, size_t size)
-		{
-			pv = malloc(size);
+        
+        bool MemAlloc (void* pv, size_t size)
+        {
+            pv = malloc(size);
             if (pv == nullptr)
             {
                 m_StateError = IND_STATE_OVER_MAX_IN_TRANS;
                 return false;
             }
-			return true;
-		}
-		
+            return true;
+        }
+        
+        void PrintLog (const char *string, const char *format, args...)
+        {
+            if (!m_bLogEnable) return;
+            
+            char txt[128];
+            sprintf (txt, string, format, args);
+            Serial.println(txt);
+
+        }
 //
 // AssignData
 //
         bool AssignData(int num_states = 0, void* pstruct_data = nullptr, int msecCycle = 0)
         {
             m_numStates     = num_states;
-			if (num_states == 0)
-			{
+            if (num_states == 0)
+            {
                 m_StateError = NUM_STATES_EQ_ZERO;
-				return false;
-			}
+                return false;
+            }
             m_pStructData   = pstruct_data;
             m_msecCycle     = msecCycle;
             for (int i = 0; i < num_states; i++)
@@ -142,10 +151,10 @@ class CStateMachine
             if (!MemAlloc (m_fStatus,       sizeof(myStatusFunc*)*num_states))   return false;
             if (!MemAlloc (m_fDropOut,      sizeof(myDropOutFunc*)*num_states))  return false;
             if (!MemAlloc (m_fTransition,   sizeof(myTransitionFunc*)*num_states)) return false;
-			for (int i = 0; i < num_states; i++)
-			{
-				if (!MemAlloc (m_fTransition[i], sizeof(myTransitionFunc*)*num_states)) return false;
-			}
+            for (int i = 0; i < num_states; i++)
+            {
+                if (!MemAlloc (m_fTransition[i], sizeof(myTransitionFunc*)*num_states)) return false;
+            }
             if (!MemAlloc (m_fPickUp,       sizeof(myPickUpFunc*)*num_states))       return false;
             if (!MemAlloc (m_fChangeStatus, sizeof(myChangeStatusFunc*)*num_states)) return false;
             if (!MemAlloc (m_StatusName,    sizeof(myPName*)*num_states))            return false;
