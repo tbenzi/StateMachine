@@ -26,6 +26,23 @@
 // CODE EMBRYO UNDER DEVELOPMENT
 // ******************************
 
+        void _PrintLog(const char *string, const char *format, ...)
+        __attribute__((format (sprintf, 3, 4)));
+        #define PrintLog(char* string, char* format, fmt, ...) _PrintLog(char* string, char* format, fmt"\n", ##__VA_ARGS__)
+        void _PrintLog (const char *string, const char *format, ...)
+        {
+//            va_list arg;
+            char txt[128];
+
+            if (!m_bLogEnable) return;
+            
+//            va_start(arg, args);
+            sprintf (txt, string, format, __VA_ARGS__);
+            Serial.println(txt);
+//            va_end(arg);
+        }
+
+
 typedef void    (*myStatusFunc)(void* pStructData);
 typedef void    (*myDropOutFunc)(void* pStructData);
 typedef void    (*myTransitionFunc)(void* pStructData);
@@ -122,18 +139,6 @@ class CStateMachine
             return true;
         }
         
-        void PrintLog (const char *string, const char *format, ...)
-        {
-            va_list arg;
-            char txt[128];
-
-            if (!m_bLogEnable) return;
-            
-            va_start(arg, args);
-            sprintf (txt, string, format, args);
-            Serial.println(txt);
-            va_end(arg);
-        }
 //
 // AssignData
 //
