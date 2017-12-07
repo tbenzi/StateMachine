@@ -122,14 +122,17 @@ class CStateMachine
             return true;
         }
         
-        void PrintLog (const char *string, const char *format, args...)
+        void PrintLog (const char *string, const char *format, ...)
         {
+            va_list arg;
+            char txt[128];
+
             if (!m_bLogEnable) return;
             
-            char txt[128];
+            va_start(arg, args);
             sprintf (txt, string, format, args);
             Serial.println(txt);
-
+            va_end(arg);
         }
 //
 // AssignData
@@ -230,11 +233,12 @@ class CStateMachine
         void Manage()
         {
             char txt[124];
-            if (m_bLogEnable)
-            {
-                sprintf(txt,"StateMachine::Manage - State: %s [%d] -------- ", m_StatusName[m_actualState],m_actualState);
-                Serial.println(txt);
-            }
+            PrintLog ("StateMachine::Manage - State: %s [%d] -------- ", m_StatusName[m_actualState],m_actualState);
+//            if (m_bLogEnable)
+//            {
+//                sprintf(txt,"StateMachine::Manage - State: %s [%d] -------- ", m_StatusName[m_actualState],m_actualState);
+//                Serial.println(txt);
+//            }
             if (m_StateError != NO_ERROR)
             {
                 if (m_bLogEnable)

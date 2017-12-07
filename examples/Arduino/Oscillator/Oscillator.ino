@@ -24,8 +24,8 @@
 
 #define NUM_STATES 2
 
-//#include "T:\Arduino\StateMachine\src\Arduino\StateMachine.h"
-#include "C:\arduino\Develop\StateMachine\src\Arduino\StateMachineMalloc.h"
+#include "T:\Arduino\StateMachine\src\Arduino\StateMachineMalloc.h"
+//#include "C:\arduino\Develop\StateMachine\src\Arduino\StateMachineMalloc.h"
 //#include "..\..\..\src\Arduino\StateMachine.h"
 
 #define MS_CYCLE 1000
@@ -144,7 +144,7 @@ void setup ()
 	bPermanentEnableStateMachine = false;
 	
 	// assign address of global data and cycle to Statemachine
-	StateMachine.AssignData(NUM_STATES, &myData, MS_CYCLE);
+	StateMachine.AssignData(NUM_STATES, (void*)&myData, MS_CYCLE);
 	
 	// assing data for ZERO state
 	StateMachine.AssignState(0,						// state index (zero based)
